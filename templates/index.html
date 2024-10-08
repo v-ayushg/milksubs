@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milk Subscription</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Function to add vacation dates to the list
+        function addVacationDate() {
+            let vacationDate = document.getElementById("vacation_date").value;
+            let vacationList = document.getElementById("vacation_dates_list");
+            
+            // Check if the date is already in the list
+            let existingDates = Array.from(vacationList.getElementsByTagName("li")).map(item => item.textContent);
+    
+            if (vacationDate && !existingDates.includes(vacationDate)) {
+                let listItem = document.createElement("li");
+                listItem.textContent = vacationDate;
+                vacationList.appendChild(listItem);
+            } else if (existingDates.includes(vacationDate)) {
+                alert("This date is already added to the vacation list.");
+            }
+        }
+    
+        function submitSubscription() {
+            let startDate = document.getElementById("start_date").value;
+            let endDate = document.getElementById("end_date").value;
+    
+            // Collect all vacation dates
+            let vacationDates = [];
+            document.querySelectorAll("#vacation_dates_list li").forEach(function(item) {
+                vacationDates.push(item.textContent);
+            });
+    
+            // Basic validation
+            if (!startDate || !endDate) {
+                alert("Please select both start and end dates.");
+                return;
+            }
+    
+            fetch('/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    start_date: startDate, 
+                    end_date: endDate,
+                    vacation_dates: vacationDates 
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("confirmation").innerText = data.message;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    
+</head>
+<body>
+    <h1>Milk Subscription</h1>
+    <div class="subscription-form">
+        <div class="date-selector">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date">
+        </div>
+        <div class="date-selector">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date">
+        </div>
+        
+        <br>
+
+        <!-- Vacation date selector -->
+        <div class="date-selector">
+            <label for="vacation_date">Vacation Date (No Milk Delivery):</label>
+            <input type="date" id="vacation_date" name="vacation_date">
+            <button type="button" onclick="addVacationDate()">Add Vacation Date</button>
+        </div>
+        <ul id="vacation_dates_list"></ul>
+
+        <br>
+        <button type="button" onclick="submitSubscription()">Subscribe</button>
+    </div>
+
+    <!-- Confirmation message will appear below the form -->
+    <div id="confirmation" class="confirmation-message"></div>
+</body>
+</html>
