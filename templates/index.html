@@ -26,19 +26,24 @@
         function submitSubscription() {
             let startDate = document.getElementById("start_date").value;
             let endDate = document.getElementById("end_date").value;
-    
+            let milkQuantity = document.getElementById("milk_quantity").value;
+
             // Collect all vacation dates
             let vacationDates = [];
             document.querySelectorAll("#vacation_dates_list li").forEach(function(item) {
                 vacationDates.push(item.textContent);
             });
-    
+
             // Basic validation
             if (!startDate || !endDate) {
                 alert("Please select both start and end dates.");
                 return;
             }
-    
+            if (!milkQuantity || milkQuantity < 0.5) {
+                alert("Please select at least 0.5 liters of milk.");
+                return;
+            }
+
             fetch('/subscribe', {
                 method: 'POST',
                 headers: {
@@ -47,7 +52,8 @@
                 body: JSON.stringify({ 
                     start_date: startDate, 
                     end_date: endDate,
-                    vacation_dates: vacationDates 
+                    vacation_dates: vacationDates,
+                    milk_quantity: milkQuantity
                 }),
             })
             .then(response => response.json())
@@ -78,6 +84,12 @@
         </div>
         
         <br>
+
+        <!-- Milk Quantity Selection (min 0.5 liters) -->
+        <div class="milk-selector">
+            <label for="milk_quantity">Milk Quantity (liters):</label>
+            <input type="number" id="milk_quantity" name="milk_quantity" min="0.5" step="0.5" value="0.5" required>
+        </div>
 
         <!-- Vacation date selector -->
         <div class="date-selector">

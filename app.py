@@ -14,6 +14,7 @@ def subscribe():
     start_date_str = data.get('start_date')
     end_date_str = data.get('end_date')
     vacation_dates_str = data.get('vacation_dates', [])
+    milk_quantity = float(data.get('milk_quantity', 0))  # Get milk quantity from the request
 
     try:
         # Validate and parse dates
@@ -22,6 +23,10 @@ def subscribe():
 
         if end_date < start_date:
             return jsonify({"error": "End date cannot be before start date."}), 400
+
+        # Ensure milk quantity is at least 0.5 liters
+        if milk_quantity < 0.5:
+            return jsonify({"error": "Minimum milk quantity is 0.5 liters."}), 400
 
         # Convert vacation dates to datetime objects
         vacation_dates = []
@@ -52,11 +57,13 @@ def subscribe():
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid date format."}), 400
 
-    # Confirmation message with adjusted end date and vacation dates
+    # Confirmation message with adjusted end date, vacation dates, and milk quantity
     confirmation_message = f"Subscription for {subscription_duration_days} day(s) confirmed from {start_date.strftime('%d %b %Y')} to {adjusted_end_date.strftime('%d %b %Y')}."
     
     if vacation_dates:
         confirmation_message += f" Milk will not be delivered on: {vacation_dates_str}."
+    
+    confirmation_message += f" Milk Quantity: {milk_quantity} liter(s) per day."
 
     return jsonify({"message": confirmation_message})
 
